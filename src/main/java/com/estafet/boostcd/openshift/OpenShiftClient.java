@@ -2,6 +2,7 @@ package com.estafet.boostcd.openshift;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,19 @@ public class OpenShiftClient {
 			return getClient().list(ResourceKind.BUILD_CONFIG, productId + "-build", labels);
 		} catch (RuntimeException e) {
 			throw handleException(span, e);
+		} finally {
+			span.finish();
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	public List<IBuild> getBuilds(String productId) {
+		Span span = tracer.buildSpan("OpenShiftClient.getBuilds").start();
+		try {
+			return getClient().list(ResourceKind.BUILD, productId + "-cicd");
+		} catch (RuntimeException e) {
+			log.error("an error has occured whilst retreiving the builds", handleException(span, e));
+			return new ArrayList<IBuild>();
 		} finally {
 			span.finish();
 		}
