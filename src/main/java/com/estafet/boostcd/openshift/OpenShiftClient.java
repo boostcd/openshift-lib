@@ -221,11 +221,11 @@ public class OpenShiftClient {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void executeBuildPipeline(String productId, String app, String repoUrl) {
+	public void executeBuildPipeline(String productId, String productRepo, String app, String repoUrl) {
 		Span span = tracer.buildSpan("executeBuildPipeline").start();
 		try {
 			span.setBaggageItem("app",app);
-			Map<String, String> parameters = getAppParameters(productId, app, repoUrl);
+			Map<String, String> parameters = getAppParameters(productId, productRepo, app, repoUrl);
 			executePipeline((IBuildConfig) getClient().get(ResourceKind.BUILD_CONFIG, "build-" + app, ENV.cicd(productId)), parameters);
 		} catch (RuntimeException e) {
 			throw handleException(span, e);
@@ -234,21 +234,21 @@ public class OpenShiftClient {
 		}
 	}
 	
-	private Map<String, String> getAppParameters(String productId, String app, String repoUrl) {
+	private Map<String, String> getAppParameters(String productId, String productRepo, String app, String repoUrl) {
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("REPO", repoUrl);
 		parameters.put("PRODUCT", ENV.prod(productId));
 		parameters.put("MICROSERVICE", app);
-		parameters.put("PRODUCT_REPO", System.getenv("PRODUCT_REPO"));
+		parameters.put("PRODUCT_REPO", productRepo);
 		return parameters;
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executeBuildPipeline(String productId, String app) {
+	public void executeBuildPipeline(String productId, String productRepo, String app) {
 		Span span = tracer.buildSpan("executeBuildPipeline").start();
 		try {
 			span.setBaggageItem("app",app);
-			Map<String, String> parameters = getAppParameters(productId, app);
+			Map<String, String> parameters = getAppParameters(productId, productRepo, app);
 			executePipeline((IBuildConfig) getClient().get(ResourceKind.BUILD_CONFIG, "build-" + app, ENV.cicd(productId)), parameters);
 		} catch (RuntimeException e) {
 			throw handleException(span, e);
@@ -257,21 +257,21 @@ public class OpenShiftClient {
 		}
 	}
 
-	private Map<String, String> getAppParameters(String productId, String app) {
+	private Map<String, String> getAppParameters(String productId, String productRepo, String app) {
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("REPO", repoUrl(productId, app));
 		parameters.put("PRODUCT", ENV.prod(productId));
 		parameters.put("MICROSERVICE", app);
-		parameters.put("PRODUCT_REPO", System.getenv("PRODUCT_REPO"));
+		parameters.put("PRODUCT_REPO", productRepo);
 		return parameters;
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executeBuildAllPipeline(String productId) {
+	public void executeBuildAllPipeline(String productId, String productRepo) {
 		Span span = tracer.buildSpan("executeBuildAllPipeline").start();
 		try {
 			Map<String, String> parameters = new HashMap<String, String>();
-			parameters.put("REPO", System.getenv("PRODUCT_REPO"));
+			parameters.put("REPO", productRepo);
 			parameters.put("PRODUCT", ENV.prod(productId));
 			executePipeline((IBuildConfig) getClient().get(ResourceKind.BUILD_CONFIG, "build-all", ENV.cicd(productId)), parameters);
 		} catch (RuntimeException e) {
@@ -282,11 +282,11 @@ public class OpenShiftClient {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executeReleasePipeline(String productId, String app) {
+	public void executeReleasePipeline(String productId, String productRepo, String app) {
 		Span span = tracer.buildSpan("executeReleasePipeline").start();
 		try {
 			span.setBaggageItem("app",app);
-			Map<String, String> parameters = getAppParameters(productId, app);
+			Map<String, String> parameters = getAppParameters(productId, productRepo, app);
 			executePipeline((IBuildConfig) getClient().get(ResourceKind.BUILD_CONFIG, "release-" + app, ENV.cicd(productId)), parameters);
 		} catch (RuntimeException e) {
 			throw handleException(span, e);
@@ -296,11 +296,11 @@ public class OpenShiftClient {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executeReleaseAllPipeline(String productId) {
+	public void executeReleaseAllPipeline(String productId, String productRepo) {
 		Span span = tracer.buildSpan("executeReleaseAllPipeline").start();
 		try {
 			Map<String, String> parameters = new HashMap<String, String>();
-			parameters.put("REPO", System.getenv("PRODUCT_REPO"));
+			parameters.put("REPO", productRepo);
 			parameters.put("PRODUCT", productId);
 			executePipeline((IBuildConfig) getClient().get(ResourceKind.BUILD_CONFIG, "release-all", ENV.cicd(productId)), parameters);
 		} catch (RuntimeException e) {
@@ -311,12 +311,12 @@ public class OpenShiftClient {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executePromotePipeline(String productId, String env, String app, String next) {
+	public void executePromotePipeline(String productId, String productRepo, String env, String app, String next) {
 		Span span = tracer.buildSpan("executePromotePipeline").start();
 		try {
 			span.setBaggageItem("env", env);
 			span.setBaggageItem("app", app);
-			Map<String, String> parameters = getAppParameters(productId, app);
+			Map<String, String> parameters = getAppParameters(productId, productRepo, app);
 			parameters.put("PROJECT", ENV.namespace(productId, env));
 			String pipeline;
 			if (next.equals("prod")) {
@@ -333,10 +333,10 @@ public class OpenShiftClient {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void executePromoteAllPipeline(String productId, String env, String next) {
+	public void executePromoteAllPipeline(String productId, String productRepo, String env, String next) {
 		Span span = tracer.buildSpan("executePromoteAllPipeline").start();
 		try {
-			Map<String, String> parameters = getEnvParameters(productId, env);
+			Map<String, String> parameters = getEnvParameters(productId, productRepo, env);
 			span.setBaggageItem("env", env);
 			String name;
 			if (next.equals("prod")) {
@@ -353,20 +353,20 @@ public class OpenShiftClient {
 		}
 	}
 
-	private Map<String, String> getEnvParameters(String productId, String env) {
+	private Map<String, String> getEnvParameters(String productId, String productRepo, String env) {
 		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("REPO", System.getenv("PRODUCT_REPO"));
+		parameters.put("REPO", productRepo);
 		parameters.put("PRODUCT", productId);
 		parameters.put("PROJECT", ENV.namespace(productId, env));
 		return parameters;
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executeTestPipeline(String productId, String env) {
+	public void executeTestPipeline(String productId, String productRepo, String env) {
 		Span span = tracer.buildSpan("executeTestPipeline").start();
 		try {
 			IBuildConfig testPipeline = getTestBuildConfig(productId, env);
-			Map<String, String> parameters = getEnvParameters(productId, env);
+			Map<String, String> parameters = getEnvParameters(productId, productRepo, env);
 			String gitRepository = new BuildConfigParser(testPipeline).getGitRepository();
 			parameters.put("ENV", env);
 			parameters.put("REPO",  gitRepository);
