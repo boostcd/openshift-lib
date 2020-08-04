@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>com.estafet.boostcd</groupId>
 			<artifactId>commons-lib</artifactId>
-			<version>0.0.17-SNAPSHOT</version>
+			<version>0.0.17</version>
 			<scope>provided</scope>
 		</dependency>			
 		<dependency>
