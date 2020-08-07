@@ -237,7 +237,7 @@ public class OpenShiftClient {
 	private Map<String, String> getAppParameters(String productId, String productRepo, String app, String repoUrl) {
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("REPO", repoUrl);
-		parameters.put("PRODUCT", ENV.prod(productId));
+		parameters.put("PRODUCT", productId);
 		parameters.put("MICROSERVICE", app);
 		parameters.put("PRODUCT_REPO", productRepo);
 		return parameters;
@@ -260,7 +260,7 @@ public class OpenShiftClient {
 	private Map<String, String> getAppParameters(String productId, String productRepo, String app) {
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("REPO", repoUrl(productId, app));
-		parameters.put("PRODUCT", ENV.prod(productId));
+		parameters.put("PRODUCT", productId);
 		parameters.put("MICROSERVICE", app);
 		parameters.put("PRODUCT_REPO", productRepo);
 		return parameters;
@@ -272,7 +272,7 @@ public class OpenShiftClient {
 		try {
 			Map<String, String> parameters = new HashMap<String, String>();
 			parameters.put("REPO", productRepo);
-			parameters.put("PRODUCT", ENV.prod(productId));
+			parameters.put("PRODUCT", productId);
 			executePipeline((IBuildConfig) getClient().get(ResourceKind.BUILD_CONFIG, "build-all", ENV.cicd(productId)), parameters);
 		} catch (RuntimeException e) {
 			throw handleException(span, e);
